@@ -174,3 +174,75 @@ select option:checked {
     grid-template-columns: 1fr;
   }
 }
+
+.strategy-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  grid-column: 1 / -1;
+  margin-top: 2rem;
+}
+
+.strategy-card h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.strategy-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.strategy-section {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 1.2rem;
+}
+
+.strategy-section h3 {
+  color: #34495e;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+.strategy-section ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.strategy-section li {
+  color: #495057;
+  margin-bottom: 0.8rem;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.4;
+}
+
+.strategy-section li:before {
+  content: "•";
+  color: #646cff;
+  position: absolute;
+  left: 0;
+  font-size: 1.2em;
+}
+
+.strategy-section li:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .strategy-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .strategy-section {
+    margin-bottom: 1rem;
+  }
+}

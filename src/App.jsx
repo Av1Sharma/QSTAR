@@ -29,17 +29,20 @@ function App() {
   const [selectedAlliance, setSelectedAlliance] = useState('')
   const [matchData, setMatchData] = useState(null)
   const [teamStats, setTeamStats] = useState({})
+  const [strategyAnalysis, setStrategyAnalysis] = useState(null)
   const [loading, setLoading] = useState({
     events: false,
     matches: false,
     matchData: false,
-    teamStats: false
+    teamStats: false,
+    strategy: false
   })
   const [error, setError] = useState({
     events: null,
     matches: null,
     matchData: null,
-    teamStats: null
+    teamStats: null,
+    strategy: null
   })
 
   // Reset dependent selections when region changes
@@ -202,6 +205,69 @@ function App() {
     fetchTeamStats()
   }, [matchData, selectedAlliance, selectedEvent])
 
+  // Update the analyzeStrategy function
+  const analyzeStrategy = async () => {
+    if (!matchData || !selectedAlliance || !matchData.alliances || !matchData.alliances[selectedAlliance]) {
+      console.log('Skipping strategy analysis: dependencies not fully set or alliance data missing')
+      setStrategyAnalysis(null)
+      return
+    }
+
+    const teams = matchData.alliances[selectedAlliance].team_keys
+    
+    if (!Array.isArray(teams)) {
+      console.error('Teams data is not an array for alliance:', selectedAlliance)
+      setError(prev => ({ 
+        ...prev, 
+        strategy: `Could not get team list for the selected alliance. Please try a different match or alliance.` 
+      }))
+      setStrategyAnalysis(null)
+      return
+    }
+
+    setLoading(prev => ({ ...prev, strategy: true }))
+    setError(prev => ({ ...prev, strategy: null }))
+    
+    try {
+      // First test if the backend is available
+      try {
+        await axios.get('http://localhost:3001/api/test')
+      } catch (error) {
+        console.error('Backend test failed:', error)
+        throw new Error('Backend server is not available. Please make sure it is running.')
+      }
+
+      console.log('Sending strategy analysis request for teams:', teams, 'event:', selectedEvent)
+      const response = await axios.post('http://localhost:3001/api/analyze-strategy', {
+        teams,
+        event: selectedEvent
+      })
+
+      if (response.data.error) {
+        throw new Error(response.data.error)
+      }
+
+      console.log('Received strategy analysis:', response.data)
+      setStrategyAnalysis(response.data)
+    } catch (error) {
+      console.error('Error analyzing strategy:', error)
+      setError(prev => ({ 
+        ...prev, 
+        strategy: `Failed to analyze strategy: ${error.message}. Please try again.` 
+      }))
+      setStrategyAnalysis(null)
+    } finally {
+      setLoading(prev => ({ ...prev, strategy: false }))
+    }
+  }
+
+  // Add useEffect to trigger strategy analysis when team stats are updated
+  useEffect(() => {
+    if (Object.keys(teamStats).length > 0) {
+      analyzeStrategy()
+    }
+  }, [teamStats])
+
   // Helper function to get descriptive match name
   const getMatchName = (match) => {
     if (!match) return 'Unknown Match'
@@ -329,7 +395,7 @@ function App() {
           </select>
           {loading.teamStats && <div className="loading">Loading team stats...</div>}
           {error.teamStats && <div className="error">{error.teamStats}</div>}
-      </div>
+        </div>
       </div>
 
       {selectedAlliance && matchData && (
@@ -338,33 +404,80 @@ function App() {
           {error.teamStats && <div className="error">{error.teamStats}</div>}
 
           {!loading.teamStats && !error.teamStats && matchData.alliances && matchData.alliances[selectedAlliance] && Array.isArray(matchData.alliances[selectedAlliance].team_keys) && matchData.alliances[selectedAlliance].team_keys.length > 0 ? (
-            matchData.alliances[selectedAlliance].team_keys.map(team => (
-              <div key={team} className="team-card">
-                <h2>Team {team}</h2>
-                {teamStats[team] ? (
-                  <div className="team-stats">
-                    <h3>EPA Breakdown</h3>
-                    <p>Total EPA: {teamStats[team].epa?.unitless?.toFixed(2)}</p>
-                    <p>Average Total Points: {teamStats[team].epa?.total_points?.mean?.toFixed(2)}</p>
-                    <p>Auto Points (from EPA): {teamStats[team].epa?.breakdown?.auto_points?.toFixed(2)}</p>
-                    <p>Teleop Points (from EPA): {teamStats[team].epa?.breakdown?.teleop_points?.toFixed(2)}</p>
-                    <p>Endgame Points (from EPA): {teamStats[team].epa?.breakdown?.endgame_points?.toFixed(2)}</p>
-                    
-                    <h3>Performance Metrics</h3>
-                    <p>Auto Game Pieces (Coral): {teamStats[team].epa?.breakdown?.auto_coral?.toFixed(2)}</p>
-                    <p>Teleop Game Pieces (Coral): {teamStats[team].epa?.breakdown?.teleop_coral?.toFixed(2)}</p>
-                    <p>Net Algae (from EPA): {teamStats[team].epa?.breakdown?.net_algae?.toFixed(2)}</p>
-                    {/* Note: Specific 'Speaker'/'Amp' notes or 'Accuracy' not available in this endpoint structure */}
+            <>
+              {matchData.alliances[selectedAlliance].team_keys.map(team => (
+                <div key={team} className="team-card">
+                  <h2>Team {team}</h2>
+                  {teamStats[team] ? (
+                    <div className="team-stats">
+                      <h3>EPA Breakdown</h3>
+                      <p>Total EPA: {teamStats[team].epa?.unitless?.toFixed(2)}</p>
+                      <p>Average Total Points: {teamStats[team].epa?.total_points?.mean?.toFixed(2)}</p>
+                      <p>Auto Points (from EPA): {teamStats[team].epa?.breakdown?.auto_points?.toFixed(2)}</p>
+                      <p>Teleop Points (from EPA): {teamStats[team].epa?.breakdown?.teleop_points?.toFixed(2)}</p>
+                      <p>Endgame Points (from EPA): {teamStats[team].epa?.breakdown?.endgame_points?.toFixed(2)}</p>
+                      
+                      <h3>Performance Metrics</h3>
+                      <p>Auto Game Pieces (Coral): {teamStats[team].epa?.breakdown?.auto_coral?.toFixed(2)}</p>
+                      <p>Teleop Game Pieces (Coral): {teamStats[team].epa?.breakdown?.teleop_coral?.toFixed(2)}</p>
+                      <p>Net Algae (from EPA): {teamStats[team].epa?.breakdown?.net_algae?.toFixed(2)}</p>
+                    </div>
+                  ) : (
+                    <div className="loading">Loading stats for team {team}...</div>
+                  )}
+                </div>
+              ))}
+
+              {/* Strategy Analysis Section */}
+              <div className="strategy-card">
+                <h2>Strategy Analysis</h2>
+                {loading.strategy && <div className="loading">Analyzing strategy...</div>}
+                {error.strategy && <div className="error">{error.strategy}</div>}
+                
+                {!loading.strategy && !error.strategy && strategyAnalysis && (
+                  <div className="strategy-content">
+                    <div className="strategy-section">
+                      <h3>Auto Strategy</h3>
+                      <ul>
+                        {strategyAnalysis.strategy.autoStrategy.map((strategy, index) => (
+                          <li key={`auto-${index}`}>{strategy}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="strategy-section">
+                      <h3>Teleop Strategy</h3>
+                      <ul>
+                        {strategyAnalysis.strategy.teleopStrategy.map((strategy, index) => (
+                          <li key={`teleop-${index}`}>{strategy}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="strategy-section">
+                      <h3>Endgame Strategy</h3>
+                      <ul>
+                        {strategyAnalysis.strategy.endgameStrategy.map((strategy, index) => (
+                          <li key={`endgame-${index}`}>{strategy}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="strategy-section">
+                      <h3>General Recommendations</h3>
+                      <ul>
+                        {strategyAnalysis.strategy.recommendations.map((recommendation, index) => (
+                          <li key={`rec-${index}`}>{recommendation}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                ) : (
-                  <div className="loading">Loading stats for team {team}...</div>
                 )}
               </div>
-            ))
+            </>
           ) : !loading.teamStats && !error.teamStats ? (
-             <div className="error">Could not load team data for this match.</div>
+            <div className="error">Could not load team data for this match.</div>
           ) : null}
-          
         </div>
       )}
     </div>

@@ -436,41 +436,48 @@ function App() {
                 
                 {!loading.strategy && !error.strategy && strategyAnalysis && (
                   <div className="strategy-content">
-                    <div className="strategy-section">
-                      <h3>Auto Strategy</h3>
-                      <ul>
-                        {strategyAnalysis.strategy.autoStrategy.map((strategy, index) => (
-                          <li key={`auto-${index}`}>{strategy}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    {/* Check if there's a strategy error */}
+                    {strategyAnalysis.strategy && strategyAnalysis.strategy.error ? (
+                      <div className="error">{`Backend Strategy Error: ${strategyAnalysis.strategy.error}`}</div>
+                    ) : (
+                      <>
+                        <div className="strategy-section">
+                          <h3>Auto Strategy</h3>
+                          <ul>
+                            {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.autoStrategy && strategyAnalysis.strategy.autoStrategy.map((strategy, index) => (
+                              <li key={`auto-${index}`}>{strategy}</li>
+                            ))}
+                          </ul>
+                        </div>
 
-                    <div className="strategy-section">
-                      <h3>Teleop Strategy</h3>
-                      <ul>
-                        {strategyAnalysis.strategy.teleopStrategy.map((strategy, index) => (
-                          <li key={`teleop-${index}`}>{strategy}</li>
-                        ))}
-                      </ul>
-                    </div>
+                        <div className="strategy-section">
+                          <h3>Teleop Strategy</h3>
+                          <ul>
+                            {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.teleopStrategy && strategyAnalysis.strategy.teleopStrategy.map((strategy, index) => (
+                              <li key={`teleop-${index}`}>{strategy}</li>
+                            ))}
+                          </ul>
+                        </div>
 
-                    <div className="strategy-section">
-                      <h3>Endgame Strategy</h3>
-                      <ul>
-                        {strategyAnalysis.strategy.endgameStrategy.map((strategy, index) => (
-                          <li key={`endgame-${index}`}>{strategy}</li>
-                        ))}
-                      </ul>
-                    </div>
+                        <div className="strategy-section">
+                          <h3>Endgame Strategy</h3>
+                          <ul>
+                            {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.endgameStrategy && strategyAnalysis.strategy.endgameStrategy.map((strategy, index) => (
+                              <li key={`endgame-${index}`}>{strategy}</li>
+                            ))}
+                          </ul>
+                        </div>
 
-                    <div className="strategy-section">
-                      <h3>General Recommendations</h3>
-                      <ul>
-                        {strategyAnalysis.strategy.recommendations.map((recommendation, index) => (
-                          <li key={`rec-${index}`}>{recommendation}</li>
-                        ))}
-                      </ul>
-                    </div>
+                        <div className="strategy-section">
+                          <h3>General Recommendations</h3>
+                          <ul>
+                            {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.recommendations && strategyAnalysis.strategy.recommendations.map((recommendation, index) => (
+                              <li key={`rec-${index}`}>{recommendation}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>

@@ -1,6 +1,6 @@
 const config = {
   // Use environment variable for API URL, fallback to localhost for development
-  API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3001',
+  API_URL: import.meta.env.VITE_API_URL || 'https://qstar-pied.vercel.app/api',
   STATBOTICS_API_URL: 'https://api.statbotics.io/v3'
 };
 

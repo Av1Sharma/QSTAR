@@ -110,53 +110,84 @@ select option:checked {
   color: white;
 }
 
-.loading {
-  color: #666;
-  font-size: 0.9rem;
-  font-style: italic;
-}
-
-.error {
-  color: #dc3545;
-  font-size: 0.9rem;
-}
-
-.team-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.team-card {
-  background-color: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.team-card h2 {
-  color: #2c3e50;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-.team-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.team-stats h3 {
-  color: #34495e;
-  margin: 1rem 0 0.5rem;
+.loading, .error {
+  text-align: center;
+  padding: 2rem;
   font-size: 1.2rem;
 }
 
-.team-stats p {
-  margin: 0;
-  color: #666;
+.error {
+  color: #dc2626;
+}
+
+.team-selection {
+  margin: 2rem 0;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.team-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.team-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.team-card.selected {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.team-stats {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.analyze-button {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 2rem auto;
+  padding: 0.75rem 1.5rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
   font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.analyze-button:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.analyze-button:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+.analysis {
+  margin-top: 2rem;
+  padding: 2rem;
+  background-color: #f8fafc;
+  border-radius: 0.5rem;
+}
+
+.analysis-content {
+  white-space: pre-wrap;
+  line-height: 1.6;
 }
 
 /* Responsive adjustments */
@@ -170,7 +201,7 @@ select option:checked {
     width: 100%;
   }
   
-  .team-cards {
+  .team-grid {
     grid-template-columns: 1fr;
   }
 }

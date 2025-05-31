@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './App.css'
-
-const API_BASE_URL = 'https://api.statbotics.io/v3'
+import config from './config'
 
 // FRC Regions/Districts
 const REGIONS = [
@@ -18,6 +17,9 @@ const REGIONS = [
   { id: 'pch', name: 'Peachtree' },
   { id: 'isr', name: 'Israel' }
 ]
+
+// Update API_BASE_URL to use config
+const API_BASE_URL = config.STATBOTICS_API_URL;
 
 function App() {
   const [regions] = useState(REGIONS)
@@ -231,14 +233,14 @@ function App() {
     try {
       // First test if the backend is available
       try {
-        await axios.get('http://localhost:3001/api/test')
+        await axios.get(`${config.API_URL}/api/test`)
       } catch (error) {
         console.error('Backend test failed:', error)
         throw new Error('Backend server is not available. Please make sure it is running.')
       }
 
       console.log('Sending strategy analysis request for teams:', teams, 'event:', selectedEvent)
-      const response = await axios.post('http://localhost:3001/api/analyze-strategy', {
+      const response = await axios.post(`${config.API_URL}/api/analyze-strategy`, {
         teams,
         event: selectedEvent
       })

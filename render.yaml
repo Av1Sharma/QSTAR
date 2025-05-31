@@ -11,8 +11,9 @@ services:
     healthCheckPath: /api/test
 
   # Frontend service
-  - type: static
+  - type: web
     name: q-star-frontend
+    env: static
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:

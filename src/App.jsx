@@ -21,6 +21,24 @@ const REGIONS = [
 // Update API_BASE_URL to use config
 const API_BASE_URL = config.STATBOTICS_API_URL;
 
+// Add this new component at the top level of the file
+const MetricDropdown = ({ title, isOpen, onToggle, children }) => (
+  <div className="metric-dropdown">
+    <button 
+      className={`dropdown-header ${isOpen ? 'open' : ''}`} 
+      onClick={onToggle}
+    >
+      {title}
+      <span className="dropdown-arrow">{isOpen ? '▼' : '▶'}</span>
+    </button>
+    {isOpen && (
+      <div className="dropdown-content">
+        {children}
+      </div>
+    )}
+  </div>
+);
+
 function App() {
   const [regions] = useState(REGIONS)
   const [selectedRegion, setSelectedRegion] = useState('')
@@ -46,6 +64,14 @@ function App() {
     teamStats: null,
     strategy: null
   })
+  const [openDropdowns, setOpenDropdowns] = useState({})
+
+  const toggleDropdown = (teamId, type) => {
+    setOpenDropdowns(prev => ({
+      ...prev,
+      [`${teamId}-${type}`]: !prev[`${teamId}-${type}`]
+    }));
+  };
 
   // Reset dependent selections when region changes
   useEffect(() => {
@@ -328,6 +354,63 @@ function App() {
     return `${typeLabel} ${matchDetail}`.trim();
   }
 
+  // Update the team cards section
+  const renderTeamCards = () => {
+    if (!matchData?.alliances?.[selectedAlliance]?.team_keys) return null;
+
+    return matchData.alliances[selectedAlliance].team_keys.map(team => (
+      <div key={team} className="team-card">
+        <h2>Team {team}</h2>
+        {teamStats[team] ? (
+          <div className="team-stats">
+            <h3>EPA Breakdown</h3>
+            <p>Total EPA: {teamStats[team].epa?.unitless?.toFixed(2)}</p>
+            <p>Average Total Points: {teamStats[team].epa?.total_points?.mean?.toFixed(2)}</p>
+            <p>Auto Points (from EPA): {teamStats[team].epa?.breakdown?.auto_points?.toFixed(2)}</p>
+            <p>Teleop Points (from EPA): {teamStats[team].epa?.breakdown?.teleop_points?.toFixed(2)}</p>
+            <p>Endgame Points (from EPA): {teamStats[team].epa?.breakdown?.endgame_points?.toFixed(2)}</p>
+            
+            <h3>Performance Metrics</h3>
+            <p>Auto Game Pieces (Coral): {teamStats[team].epa?.breakdown?.auto_coral?.toFixed(2)}</p>
+            <p>Teleop Game Pieces (Coral): {teamStats[team].epa?.breakdown?.teleop_coral?.toFixed(2)}</p>
+            <p>Net Algae (from EPA): {teamStats[team].epa?.breakdown?.net_algae?.toFixed(2)}</p>
+
+            <MetricDropdown 
+              title="Coral Metrics" 
+              isOpen={openDropdowns[`${team}-coral`] || false}
+              onToggle={() => toggleDropdown(team, 'coral')}
+            >
+              <div className="metric-details">
+                <p>Auto Coral: {teamStats[team].epa?.breakdown?.auto_coral?.toFixed(2)}</p>
+                <p>Auto Coral Points: {teamStats[team].epa?.breakdown?.auto_coral_points?.toFixed(2)}</p>
+                <p>Coral L1: {teamStats[team].epa?.breakdown?.coral_l1?.toFixed(2)}</p>
+                <p>Coral L2: {teamStats[team].epa?.breakdown?.coral_l2?.toFixed(2)}</p>
+                <p>Coral L3: {teamStats[team].epa?.breakdown?.coral_l3?.toFixed(2)}</p>
+                <p>Coral L4: {teamStats[team].epa?.breakdown?.coral_l4?.toFixed(2)}</p>
+                <p>Coral RP: {teamStats[team].epa?.breakdown?.coral_rp?.toFixed(4)}</p>
+              </div>
+            </MetricDropdown>
+
+            <MetricDropdown 
+              title="Algae Metrics" 
+              isOpen={openDropdowns[`${team}-algae`] || false}
+              onToggle={() => toggleDropdown(team, 'algae')}
+            >
+              <div className="metric-details">
+                <p>Net Algae: {teamStats[team].epa?.breakdown?.net_algae?.toFixed(2)}</p>
+                <p>Net Algae Points: {teamStats[team].epa?.breakdown?.net_algae_points?.toFixed(2)}</p>
+                <p>Processor Algae: {teamStats[team].epa?.breakdown?.processor_algae?.toFixed(2)}</p>
+                <p>Processor Algae Points: {teamStats[team].epa?.breakdown?.processor_algae_points?.toFixed(2)}</p>
+              </div>
+            </MetricDropdown>
+          </div>
+        ) : (
+          <div className="loading">Loading stats for team {team}...</div>
+        )}
+      </div>
+    ));
+  };
+
   return (
     <div className="app">
       <header>
@@ -404,89 +487,61 @@ function App() {
         <div className="team-cards">
           {loading.teamStats && <div className="loading">Loading team stats...</div>}
           {error.teamStats && <div className="error">{error.teamStats}</div>}
+          {renderTeamCards()}
 
-          {!loading.teamStats && !error.teamStats && matchData.alliances && matchData.alliances[selectedAlliance] && Array.isArray(matchData.alliances[selectedAlliance].team_keys) && matchData.alliances[selectedAlliance].team_keys.length > 0 ? (
-            <>
-              {matchData.alliances[selectedAlliance].team_keys.map(team => (
-                <div key={team} className="team-card">
-                  <h2>Team {team}</h2>
-                  {teamStats[team] ? (
-                    <div className="team-stats">
-                      <h3>EPA Breakdown</h3>
-                      <p>Total EPA: {teamStats[team].epa?.unitless?.toFixed(2)}</p>
-                      <p>Average Total Points: {teamStats[team].epa?.total_points?.mean?.toFixed(2)}</p>
-                      <p>Auto Points (from EPA): {teamStats[team].epa?.breakdown?.auto_points?.toFixed(2)}</p>
-                      <p>Teleop Points (from EPA): {teamStats[team].epa?.breakdown?.teleop_points?.toFixed(2)}</p>
-                      <p>Endgame Points (from EPA): {teamStats[team].epa?.breakdown?.endgame_points?.toFixed(2)}</p>
-                      
-                      <h3>Performance Metrics</h3>
-                      <p>Auto Game Pieces (Coral): {teamStats[team].epa?.breakdown?.auto_coral?.toFixed(2)}</p>
-                      <p>Teleop Game Pieces (Coral): {teamStats[team].epa?.breakdown?.teleop_coral?.toFixed(2)}</p>
-                      <p>Net Algae (from EPA): {teamStats[team].epa?.breakdown?.net_algae?.toFixed(2)}</p>
+          {/* Strategy Analysis Section */}
+          <div className="strategy-card">
+            <h2>Strategy Analysis</h2>
+            {loading.strategy && <div className="loading">Analyzing strategy...</div>}
+            {error.strategy && <div className="error">{error.strategy}</div>}
+            
+            {!loading.strategy && !error.strategy && strategyAnalysis && (
+              <div className="strategy-content">
+                {/* Check if there's a strategy error */}
+                {strategyAnalysis.strategy && strategyAnalysis.strategy.error ? (
+                  <div className="error">{`Backend Strategy Error: ${strategyAnalysis.strategy.error}`}</div>
+                ) : (
+                  <>
+                    <div className="strategy-section">
+                      <h3>Auto Strategy</h3>
+                      <ul>
+                        {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.autoStrategy && strategyAnalysis.strategy.autoStrategy.map((strategy, index) => (
+                          <li key={`auto-${index}`}>{strategy}</li>
+                        ))}
+                      </ul>
                     </div>
-                  ) : (
-                    <div className="loading">Loading stats for team {team}...</div>
-                  )}
-                </div>
-              ))}
 
-              {/* Strategy Analysis Section */}
-              <div className="strategy-card">
-                <h2>Strategy Analysis</h2>
-                {loading.strategy && <div className="loading">Analyzing strategy...</div>}
-                {error.strategy && <div className="error">{error.strategy}</div>}
-                
-                {!loading.strategy && !error.strategy && strategyAnalysis && (
-                  <div className="strategy-content">
-                    {/* Check if there's a strategy error */}
-                    {strategyAnalysis.strategy && strategyAnalysis.strategy.error ? (
-                      <div className="error">{`Backend Strategy Error: ${strategyAnalysis.strategy.error}`}</div>
-                    ) : (
-                      <>
-                        <div className="strategy-section">
-                          <h3>Auto Strategy</h3>
-                          <ul>
-                            {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.autoStrategy && strategyAnalysis.strategy.autoStrategy.map((strategy, index) => (
-                              <li key={`auto-${index}`}>{strategy}</li>
-                            ))}
-                          </ul>
-                        </div>
+                    <div className="strategy-section">
+                      <h3>Teleop Strategy</h3>
+                      <ul>
+                        {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.teleopStrategy && strategyAnalysis.strategy.teleopStrategy.map((strategy, index) => (
+                          <li key={`teleop-${index}`}>{strategy}</li>
+                        ))}
+                      </ul>
+                    </div>
 
-                        <div className="strategy-section">
-                          <h3>Teleop Strategy</h3>
-                          <ul>
-                            {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.teleopStrategy && strategyAnalysis.strategy.teleopStrategy.map((strategy, index) => (
-                              <li key={`teleop-${index}`}>{strategy}</li>
-                            ))}
-                          </ul>
-                        </div>
+                    <div className="strategy-section">
+                      <h3>Endgame Strategy</h3>
+                      <ul>
+                        {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.endgameStrategy && strategyAnalysis.strategy.endgameStrategy.map((strategy, index) => (
+                          <li key={`endgame-${index}`}>{strategy}</li>
+                        ))}
+                      </ul>
+                    </div>
 
-                        <div className="strategy-section">
-                          <h3>Endgame Strategy</h3>
-                          <ul>
-                            {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.endgameStrategy && strategyAnalysis.strategy.endgameStrategy.map((strategy, index) => (
-                              <li key={`endgame-${index}`}>{strategy}</li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div className="strategy-section">
-                          <h3>General Recommendations</h3>
-                          <ul>
-                            {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.recommendations && strategyAnalysis.strategy.recommendations.map((recommendation, index) => (
-                              <li key={`rec-${index}`}>{recommendation}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </>
-                    )}
-                  </div>
+                    <div className="strategy-section">
+                      <h3>General Recommendations</h3>
+                      <ul>
+                        {strategyAnalysis && strategyAnalysis.strategy && strategyAnalysis.strategy.recommendations && strategyAnalysis.strategy.recommendations.map((recommendation, index) => (
+                          <li key={`rec-${index}`}>{recommendation}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
                 )}
               </div>
-            </>
-          ) : !loading.teamStats && !error.teamStats ? (
-            <div className="error">Could not load team data for this match.</div>
-          ) : null}
+            )}
+          </div>
         </div>
       )}
     </div>

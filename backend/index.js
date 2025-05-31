@@ -162,7 +162,7 @@ Ranking Point Objectives: How each RP will be targeted (Auto RP, Coral RP, Barge
 Defense & Contingency: Any planned defense or counter-strategy vs opponents; adjustments if something goes wrong.
 Alliance Role Breakdown: Primary focus per team and how roles complement each other.
 
-Include team numbers in the strategy and make sure to include all 3 teams as well.
+Include team numbers in the strategy and make sure to include all 3 teams as well. The closer each EPA is to 0, the less likely the team can do that and is efficient at it. For example, coral_l3 is 1.13 but processoe_algae_points is 7.2, this means that the team focuses more on algae and mostly likely cannot score coral.
 
 Provide the output in a JSON format with the following structure:
 {

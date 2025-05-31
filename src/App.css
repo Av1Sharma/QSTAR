@@ -277,3 +277,56 @@ select option:checked {
     margin-bottom: 1rem;
   }
 }
+
+.metric-dropdown {
+  margin: 1rem 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.dropdown-header {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #f8fafc;
+  border: none;
+  text-align: left;
+  font-weight: 600;
+  color: #1f2937;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.dropdown-header:hover {
+  background-color: #f1f5f9;
+}
+
+.dropdown-header.open {
+  background-color: #e2e8f0;
+}
+
+.dropdown-arrow {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.dropdown-content {
+  padding: 1rem;
+  background-color: white;
+}
+
+.metric-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metric-details p {
+  margin: 0;
+  padding: 0.25rem 0;
+  color: #4b5563;
+  font-size: 0.9rem;
+}

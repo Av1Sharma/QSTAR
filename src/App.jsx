@@ -92,17 +92,9 @@ function App() {
       try {
         const currentYear = new Date().getFullYear()
         const url = `${API_BASE_URL}/events?year=${currentYear}&district=${selectedRegion}&limit=1000`
-        console.log('Fetching events from:', url)
         const response = await axios.get(url)
-        console.log('Events response:', response.data)
         setEvents(response.data)
       } catch (error) {
-        console.error('Error fetching events:', {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status,
-          headers: error.response?.headers
-        })
         setError(prev => ({ 
           ...prev, 
           events: `Failed to load events: ${error.message}. Please try again.` 
@@ -124,9 +116,7 @@ function App() {
       try {
         const currentYear = new Date().getFullYear()
         const url = `${API_BASE_URL}/matches?year=${currentYear}&event=${selectedEvent}&limit=1000`
-        console.log('Fetching matches from:', url)
         const response = await axios.get(url)
-        console.log('Matches response:', response.data)
         
         // Sort matches by match number and type for better display
         const sortedMatches = response.data.sort((a, b) => {
@@ -139,12 +129,6 @@ function App() {
 
         setMatches(sortedMatches)
       } catch (error) {
-        console.error('Error fetching matches:', {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status,
-          headers: error.response?.headers
-        })
         setError(prev => ({ 
           ...prev, 
           matches: `Failed to load matches: ${error.message}. Please try again.` 
@@ -166,7 +150,6 @@ function App() {
         const response = await axios.get(`${API_BASE_URL}/match/${selectedMatch}`)
         setMatchData(response.data)
       } catch (error) {
-        console.error('Error fetching match data:', error)
         setError(prev => ({ ...prev, matchData: 'Failed to load match data. Please try again.' }))
       } finally {
         setLoading(prev => ({ ...prev, matchData: false }))
@@ -179,7 +162,6 @@ function App() {
   useEffect(() => {
     const fetchTeamStats = async () => {
       if (!matchData || !selectedAlliance || !matchData.alliances || !matchData.alliances[selectedAlliance]) {
-        console.log('Skipping fetchTeamStats: dependencies not fully set or alliance data missing')
         setTeamStats({})
         return
       }
@@ -188,7 +170,6 @@ function App() {
       
       // Add check here to ensure teams is a valid array
       if (!Array.isArray(teams)) {
-        console.error('Teams data is not an array for alliance:', selectedAlliance, 'matchData.alliances[selectedAlliance]:', matchData.alliances[selectedAlliance])
         setError(prev => ({ 
           ...prev, 
           teamStats: `Could not get team list for the selected alliance. Please try a different match or alliance.` 
@@ -201,27 +182,16 @@ function App() {
       setLoading(prev => ({ ...prev, teamStats: true }))
       setError(prev => ({ ...prev, teamStats: null }))
       
-      console.log('Fetching stats for teams:', teams, 'in event:', selectedEvent)
       const stats = {}
       
       try {
         await Promise.all(teams.map(async (team) => {
           const url = `${API_BASE_URL}/team_event/${team}/${selectedEvent}`
-          console.log(`Fetching stats for team ${team} from:`, url)
           const response = await axios.get(url)
-          console.log(`Response for team ${team}:`, response.data)
           stats[team] = response.data
         }))
-        console.log('Finished fetching team stats. Setting state:', stats)
         setTeamStats(stats)
       } catch (error) {
-        console.error('Error fetching team stats:', {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status,
-          headers: error.response?.headers,
-          config: error.config // Log the request config to see the URL
-        })
         setError(prev => ({ 
           ...prev, 
           teamStats: `Failed to load team stats: ${error.message}. Please try again.` 
@@ -236,7 +206,6 @@ function App() {
   // Update the analyzeStrategy function
   const analyzeStrategy = async () => {
     if (!matchData || !selectedAlliance || !matchData.alliances || !matchData.alliances[selectedAlliance]) {
-      console.log('Skipping strategy analysis: dependencies not fully set or alliance data missing')
       setStrategyAnalysis(null)
       return
     }
@@ -244,7 +213,6 @@ function App() {
     const teams = matchData.alliances[selectedAlliance].team_keys
     
     if (!Array.isArray(teams)) {
-      console.error('Teams data is not an array for alliance:', selectedAlliance)
       setError(prev => ({ 
         ...prev, 
         strategy: `Could not get team list for the selected alliance. Please try a different match or alliance.` 
@@ -261,11 +229,9 @@ function App() {
       try {
         await axios.get(`${config.API_URL}/api/test`)
       } catch (error) {
-        console.error('Backend test failed:', error)
         throw new Error('Backend server is not available. Please make sure it is running.')
       }
 
-      console.log('Sending strategy analysis request for teams:', teams, 'event:', selectedEvent)
       const response = await axios.post(`${config.API_URL}/api/analyze-strategy`, {
         teams,
         event: selectedEvent
@@ -275,10 +241,8 @@ function App() {
         throw new Error(response.data.error)
       }
 
-      console.log('Received strategy analysis:', response.data)
       setStrategyAnalysis(response.data)
     } catch (error) {
-      console.error('Error analyzing strategy:', error)
       setError(prev => ({ 
         ...prev, 
         strategy: `Failed to analyze strategy: ${error.message}. Please try again.` 

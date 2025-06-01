@@ -4,11 +4,6 @@ import config from './config'
 const API_URL = config.API_URL
 
 const handleError = (error) => {
-  console.error('API Error:', error)
-  if (error.response) {
-    console.error('Response data:', error.response.data)
-    console.error('Response status:', error.response.status)
-  }
   throw error
 }
 

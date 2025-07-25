@@ -42,6 +42,7 @@ const MetricDropdown = ({ title, isOpen, onToggle, children }) => (
 function App() {
   const [regions] = useState(REGIONS)
   const [selectedRegion, setSelectedRegion] = useState('')
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [events, setEvents] = useState([])
   const [matches, setMatches] = useState([])
   const [selectedEvent, setSelectedEvent] = useState('')
@@ -82,17 +83,16 @@ function App() {
     setTeamStats({})
   }, [selectedRegion])
 
-  // Fetch events when region is selected
+  // Fetch events when region or year is selected
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!selectedRegion) return
-      
+      if (!selectedRegion || !selectedYear) return
       setLoading(prev => ({ ...prev, events: true }))
       setError(prev => ({ ...prev, events: null }))
       try {
-        const currentYear = new Date().getFullYear()
-        const url = `${API_BASE_URL}/events?year=${currentYear}&district=${selectedRegion}&limit=1000`
+        const url = `${API_BASE_URL}/events?year=${selectedYear}&district=${selectedRegion}&limit=1000`
         const response = await axios.get(url)
+        console.log('Events API response:', response.data)
         setEvents(response.data)
       } catch (error) {
         setError(prev => ({ 
@@ -104,7 +104,7 @@ function App() {
       }
     }
     fetchEvents()
-  }, [selectedRegion])
+  }, [selectedRegion, selectedYear])
 
   // Fetch matches when event is selected
   useEffect(() => {
@@ -114,10 +114,9 @@ function App() {
       setLoading(prev => ({ ...prev, matches: true }))
       setError(prev => ({ ...prev, matches: null }))
       try {
-        const currentYear = new Date().getFullYear()
-        const url = `${API_BASE_URL}/matches?year=${currentYear}&event=${selectedEvent}&limit=1000`
+        const url = `${API_BASE_URL}/matches?year=${selectedYear}&event=${selectedEvent}&limit=1000`
         const response = await axios.get(url)
-        
+        console.log('Matches API response:', response.data)
         // Sort matches by match number and type for better display
         const sortedMatches = response.data.sort((a, b) => {
           // Simple sorting by match number first, then match key (which includes type)
@@ -138,7 +137,7 @@ function App() {
       }
     }
     fetchMatches()
-  }, [selectedEvent])
+  }, [selectedEvent, selectedYear])
 
   // Fetch match data when match is selected
   useEffect(() => {
@@ -380,8 +379,16 @@ function App() {
       <header>
         <h1>FRC Scouting & Strategy</h1>
       </header>
-      
       <div className="selectors">
+        <div className="select-wrapper">
+          <select 
+            value={selectedYear} 
+            onChange={e => setSelectedYear(Number(e.target.value))}
+          >
+            <option value={2024}>2024</option>
+            <option value={2025}>2025</option>
+          </select>
+        </div>
         <div className="select-wrapper">
           <select 
             value={selectedRegion} 
